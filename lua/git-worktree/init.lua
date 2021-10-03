@@ -125,13 +125,14 @@ end
 local function emit_on_change(op, metadata)
     -- TODO: We don't have a way to async update what is running
     status:next_status(string.format("Running post %s callbacks", op))
-    on_tree_change_handler(op, metadata)
+    -- on_tree_change_handler(op, metadata)
+    metadata.path = M.get_worktree_path(metadata.path)
     for idx = 1, #on_change_callbacks do
         on_change_callbacks[idx](op, metadata)
     end
 end
 
-local function change_dirs(path)
+M.change_dirs = function(path)
     local worktree_path = M.get_worktree_path(path)
 
     local previous_worktree = current_worktree_path
@@ -402,8 +403,8 @@ M.switch_worktree = function(path)
         end
 
         vim.schedule(function()
-            local prev_path = change_dirs(path)
-            emit_on_change(Enum.Operations.Switch, { path = path, prev_path = prev_path })
+            -- local prev_path = M.change_dirs(path)
+            emit_on_change(Enum.Operations.Switch, { path = path })
         end)
 
     end)
